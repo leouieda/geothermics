@@ -25,46 +25,6 @@ import time
 import numpy
 
 
-def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
-                           ref_cond):
-    """
-    Generate a synthetic temperature profile using radiogenic heat generation
-    and a linearly temperature dependent thermal conductivity.
-
-    For subcrustal lithospheric modeling, use the base of the crust as the
-    reference surface.
-
-    Parameters:
-
-    * depths
-        List of depths at which the temperature will be calculated
-
-    * radheat
-        Rate of radiogenic heat generation
-
-    * condvar
-        Rate with which the conductivity varies with temperature (a linear
-        coefficient)
-
-    * ref_flux
-        The heat flux at the reference surface
-
-    * ref_temp
-        Temperature at the reference surface
-
-    * ref_cond
-        Thermal conductivity at the reference surface
-
-    Returns:
-
-    * temp_profile
-        Temperatures at the given *depths*
-    """
-
-    pass
-
-
-
 def _param_jacobian(estimate, data, depths, ref_temp, ref_cond, ref_depth):
     """
     Calculate the Jacobian matrix of the mathematical model with respect to the
@@ -238,3 +198,69 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
         print "WARNING! Exited due to reaching maximum number of iterations."
 
     return [next[0], next[1], next[2], residuals, goals]
+
+
+def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
+                           ref_cond, ref_depth):
+    """
+    Generate a synthetic temperature profile using radiogenic heat generation
+    and a linearly temperature dependent thermal conductivity.
+
+    For subcrustal lithospheric modeling, use the base of the crust as the
+    reference depth.
+
+    Parameters:
+
+    * depths
+        List of depths at which the temperature will be calculated
+
+    * radheat
+        Rate of radiogenic heat generation
+
+    * condvar
+        Rate with which the conductivity varies with temperature (a linear
+        coefficient)
+
+    * ref_flux
+        The heat flux at the reference depth
+
+    * ref_temp
+        Temperature at the reference depth
+
+    * ref_cond
+        Thermal conductivity at the reference depth
+        
+    * ref_depth
+        Reference depth
+
+    Returns:
+
+    * temp_profile
+        Temperatures at the given *depths*
+    """
+    
+    estimate = [radheat, condvar, ref_flux]
+
+    # Start a little above the reference temperature
+    next = (10*ref_temp)*numpy.ones_like(depths)
+    
+    # Use Newton's method to find the root of the model equation
+    for i in xrange(500):
+        
+        prev = next
+        
+        f0 = _model(estimate, prev, depths, ref_temp, ref_cond, ref_depth)
+        
+        jacobian = _data_jacobian(estimate, prev, ref_temp)
+        
+        correction = numpy.linalg.solve(jacobian, -1*f0)
+        
+        next = prev + correction
+        
+#        print "it %d" % (i + 1)
+        
+        if abs(correction).max() <= 1.:
+            
+            break
+        
+    return next
