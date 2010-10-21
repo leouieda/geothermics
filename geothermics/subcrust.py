@@ -31,9 +31,9 @@ def _param_jacobian(estimate, data, depths, ref_temp, ref_cond, ref_depth):
     parameters.
     """
 
-    qc_deriv = (ref_depth - depths)/ref_cond
+    qc_deriv = -(depths - ref_depth)/ref_cond
     
-    A_deriv = (depths - ref_depth)/(2*ref_cond)
+    A_deriv = ((depths - ref_depth)**2)/(2*ref_cond)
     
     B_deriv = 0.5*(data - ref_temp)**2 
 
@@ -77,7 +77,8 @@ def _model(estimate, data, depths, ref_temp, ref_cond, ref_depth):
 
 
 def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
-                        initial_flux, ref_temp, ref_cond, ref_depth, max_it=50):
+                        initial_flux, ref_temp, ref_cond, ref_depth, damping=0,
+                        max_it=50):
     """
     Invert a temperature profile for the radiogenic heat generation, linear
     thermal conductivity variation coefficient, and heat flux at the reference
@@ -129,20 +130,26 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
 
     goals = []
 
-    next = [initial_radheat, initial_condvar, initial_flux]
+    parameters = [initial_radheat, initial_condvar, initial_flux]
+    
+    adjusted_data = numpy.copy(temps)
 
     # Need this to calculate the initial residuals
-    f0 = _model(next, temps, depths, ref_temp, ref_cond, ref_depth)
-    data_jac = _data_jacobian(next, temps, ref_depth)
-    param_jac = _param_jacobian(next, temps, depths, ref_temp, ref_cond, 
-                                ref_depth)
+    f0 = _model(parameters, adjusted_data, depths, ref_temp, ref_cond, 
+                ref_depth)
+    
+    data_jac = _data_jacobian(parameters, adjusted_data, ref_depth)
+    
+    param_jac = _param_jacobian(parameters, adjusted_data, depths, ref_temp, 
+                                ref_cond, ref_depth)
 
     # Also need to calculate the Lagrange multiplier
     system = numpy.dot(data_jac, data_jac.T)
+    
     lagrange_mult = numpy.linalg.solve(system, f0)
 
     residuals = -1*numpy.dot(data_jac.T, lagrange_mult)
-
+    
     # Since there is no regularization, the goal function is just the rms
     rms = (residuals*residuals).sum()
     goals.append(rms)
@@ -154,21 +161,24 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
     for iteration in xrange(max_it):
 
         start = time.time()
-
-        prev = next
-
-        f0 = _model(prev, temps, depths, ref_temp, ref_cond, ref_depth)
-        data_jac = _data_jacobian(prev, temps, ref_depth)
-        param_jac = _param_jacobian(prev, temps, depths, ref_temp, ref_cond, 
-                                    ref_depth)
+        
+        f0 = _model(parameters, adjusted_data, depths, ref_temp, ref_cond, 
+                    ref_depth)
+        
+        data_jac = _data_jacobian(parameters, adjusted_data, ref_depth)
+        
+        param_jac = _param_jacobian(parameters, adjusted_data, depths, ref_temp, 
+                                    ref_cond, ref_depth)
 
         data_jac_inv = numpy.linalg.inv(numpy.dot(data_jac, data_jac.T))
 
         aux = numpy.dot(param_jac.T, data_jac_inv)
 
-        # Solve for the correction
+        # Solve for the correction, lagrange multiplier and residuals
         normal_eq_sys = numpy.dot(aux, param_jac)
+        
         y = -1*numpy.dot(aux, f0)
+        
         correction = numpy.linalg.solve(normal_eq_sys, y)
 
         misfit = numpy.dot(param_jac, correction) + f0
@@ -176,12 +186,15 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
         lagrange_mult = numpy.dot(data_jac_inv, misfit)
 
         residuals = -1*numpy.dot(data_jac.T, lagrange_mult)
+        
+        # Update the initial data and parameters
+        adjusted_data += residuals
+        
+        parameters += correction
 
         rms = (residuals*residuals).sum()
 
         goals.append(rms)
-        
-        next = prev + correction
 
         end = time.time()
         
@@ -197,7 +210,7 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
 
         print "WARNING! Exited due to reaching maximum number of iterations."
 
-    return [next[0], next[1], next[2], residuals, goals]
+    return [parameters[0], parameters[1], parameters[2], adjusted_data, goals]
 
 
 def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
@@ -242,7 +255,7 @@ def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
     estimate = [radheat, condvar, ref_flux]
 
     # Start a little above the reference temperature
-    next = (10*ref_temp)*numpy.ones_like(depths)
+    next = (ref_temp)*numpy.ones_like(depths)
     
     # Use Newton's method to find the root of the model equation
     for i in xrange(500):
@@ -256,11 +269,10 @@ def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
         correction = numpy.linalg.solve(jacobian, -1*f0)
         
         next = prev + correction
-        
-#        print "it %d" % (i + 1)
-        
-        if abs(correction).max() <= 1.:
+                
+        if abs(correction).max() <= 0.1:
             
             break
-        
+    print "iterations used: %d" % (i)
+    
     return next
