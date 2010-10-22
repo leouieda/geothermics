@@ -76,9 +76,8 @@ def _model(estimate, data, depths, ref_temp, ref_cond, ref_depth):
     return f
 
 
-def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
-                        initial_flux, ref_temp, ref_cond, ref_depth, damping=0,
-                        max_it=50):
+def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
+                        initial_flux, ref_temp, ref_cond, ref_depth, max_it=50):
     """
     Invert a temperature profile for the radiogenic heat generation, linear
     thermal conductivity variation coefficient, and heat flux at the reference
@@ -132,6 +131,8 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
 
     parameters = [initial_radheat, initial_condvar, initial_flux]
     
+    cov = numpy.zeros((3,3))
+    
     adjusted_data = numpy.copy(temps)
 
     # Need this to calculate the initial residuals
@@ -175,11 +176,11 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
         aux = numpy.dot(param_jac.T, data_jac_inv)
 
         # Solve for the correction, lagrange multiplier and residuals
-        normal_eq_sys = numpy.dot(aux, param_jac)
+        normal_eq_sys = numpy.dot(aux, param_jac) + 0*numpy.identity(3)
         
-        y = -1*numpy.dot(aux, f0)
-        
-        correction = numpy.linalg.solve(normal_eq_sys, y)
+        normal_eq_sys_inv = numpy.linalg.inv(normal_eq_sys)
+                
+        correction = -1*numpy.dot(numpy.dot(normal_eq_sys_inv, aux), f0)
 
         misfit = numpy.dot(param_jac, correction) + f0
 
@@ -191,7 +192,9 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
         adjusted_data += residuals
         
         parameters += correction
-
+        
+        cov += normal_eq_sys_inv
+        
         rms = (residuals*residuals).sum()
 
         goals.append(rms)
@@ -200,7 +203,8 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
         
         print "  it %d: RMS=%g (%g s)" % (iteration + 1, rms, end - start)
 
-        if abs((goals[-1] - goals[-2])/goals[-2]) <= 10**(-4):
+#        if abs((goals[-1] - goals[-2])/goals[-2]) <= 10**(-4):
+        if abs(residuals).max() <= 10**(-2):
 
             max_it_exit = False
 
@@ -210,7 +214,11 @@ def invert_temp_profile(depths, temps, initial_radheat, initial_condvar,
 
         print "WARNING! Exited due to reaching maximum number of iterations."
 
-    return [parameters[0], parameters[1], parameters[2], adjusted_data, goals]
+    cov *= error**2
+    
+    results = [parameters[0], parameters[1], parameters[2], cov, adjusted_data, goals]
+
+    return results
 
 
 def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
@@ -273,6 +281,5 @@ def synthetic_temp_profile(depths, radheat, condvar, ref_flux, ref_temp,
         if abs(correction).max() <= 0.1:
             
             break
-    print "iterations used: %d" % (i)
     
     return next
