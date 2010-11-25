@@ -1307,6 +1307,7 @@
 
 
 
+
 <rect
    style="fill:#ff0000;stroke:#000000;stroke-width:2.4000001;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
    id="rect2877"
@@ -1337,6 +1338,7 @@
      id="tspan3719-2-8"
      sodipodi:role="line"
      style="font-size:25.60000038px">k</tspan></text>
+
 
 
 
@@ -1801,6 +1803,7 @@
      style="font-weight:normal;font-family:arial;-inkscape-font-specification:Andale Mono">T</tspan></text>
 
 
+
 <text
    id="text3717-3-9-0-8"
    y="-260.61139"
@@ -1817,6 +1820,7 @@
    id="tspan6645">,</tspan>j</tspan></text>
 
 
+
 <text
    id="text3717-3-8-0"
    y="-285.74664"
@@ -1829,6 +1833,7 @@
      id="tspan3719-2-8-7"
      sodipodi:role="line"
      style="font-size:19.20000076px">k</tspan></text>
+
 
 
 </g></g><g
@@ -1848,41 +1853,44 @@
      style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.60000002;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" /><g
      transform="translate(106.24579,0.53931873)"
      id="g10770"><text
-       xml:space="preserve"
-       style="font-size:28.79999924px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Andale Mono"
-       x="90.354599"
-       y="-196.23233"
-       id="text6585-5"
-       transform="scale(1,-1)"><tspan
-         sodipodi:role="line"
-         id="tspan6587-03"
-         x="90.354599"
-         y="-196.23233"
-         style="font-weight:normal;font-family:arial;-inkscape-font-specification:Andale Mono"><tspan
+   xml:space="preserve"
+   style="font-size:28.79999924px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Andale Mono"
+   x="95.154594"
+   y="-196.23233"
+   id="text6585-5"
+   transform="scale(1,-1)"><tspan
+     sodipodi:role="line"
+     id="tspan6587-03"
+     x="95.154594"
+     y="-196.23233"
+     style="font-weight:normal;font-family:arial;-inkscape-font-specification:Andale Mono"><tspan
    id="tspan10761"
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:cmmi10;-inkscape-font-specification:cmmi10">j</tspan>=M</tspan></text>
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:cmmi10;-inkscape-font-specification:cmmi10">i</tspan>=N</tspan></text>
+
 <text
-       id="text3717-3-9-0-8-3"
-       y="-187.68961"
-       x="141.61055"
-       style="font-size:19.20000076px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:arial;-inkscape-font-specification:arial"
-       xml:space="preserve"
-       transform="scale(1,-1)"><tspan
-         y="-187.68961"
-         x="141.61055"
-         id="tspan3719-2-3-5-6-2"
-         sodipodi:role="line"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:cmmi10;-inkscape-font-specification:cmmi10">L</tspan></text>
+   id="text3717-3-9-0-8-3"
+   y="-187.68961"
+   x="141.61055"
+   style="font-size:19.20000076px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:arial;-inkscape-font-specification:arial"
+   xml:space="preserve"
+   transform="scale(1,-1)"><tspan
+     y="-187.68961"
+     x="141.61055"
+     id="tspan3719-2-3-5-6-2"
+     sodipodi:role="line"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:cmmi10;-inkscape-font-specification:cmmi10">L</tspan></text>
+
 <text
-       id="text3717-3-8-0-9"
-       y="-214.98213"
-       x="143.62546"
-       style="font-size:25.60000038px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:cmmi10;-inkscape-font-specification:cmmi10"
-       xml:space="preserve"
-       transform="scale(1,-1)"><tspan
-         y="-214.98213"
-         x="143.62546"
-         id="tspan3719-2-8-7-8"
-         sodipodi:role="line"
-         style="font-size:19.20000076px">k</tspan></text>
+   id="text3717-3-8-0-9"
+   y="-214.98213"
+   x="143.62546"
+   style="font-size:25.60000038px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:cmmi10;-inkscape-font-specification:cmmi10"
+   xml:space="preserve"
+   transform="scale(1,-1)"><tspan
+     y="-214.98213"
+     x="143.62546"
+     id="tspan3719-2-8-7-8"
+     sodipodi:role="line"
+     style="font-size:19.20000076px">k</tspan></text>
+
 </g></g></g></svg>
