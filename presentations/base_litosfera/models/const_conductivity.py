@@ -21,8 +21,6 @@ depths = numpy.arange(35000., 200000., 1000.)
 temps = subcrust.synthetic_temp_profile(depths, rad_heat, cond_var, crust_flux, 
                                         crust_temp, conductivity, crust_depth)
 
-#pylab.savetxt("const_cond_data.txt", numpy.array([depths, temps]).T)
-
 pylab.figure()
 pylab.plot(temps - 273., depths*0.001, '-k', linewidth=3, 
            label=r"A=%.1f $\mu W.m^{-3}$" % (10**6*rad_heat))

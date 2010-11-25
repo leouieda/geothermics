@@ -1,63 +1,81 @@
 """
-Invert a temperature profile for radiogenic heat generation, thermal 
-conductivity variation coefficient and heat flux.
+Invert the temperature profile of Russell et al. (2001)
 """
 
+import math
 
-import pylab
 import numpy
+import pylab
 
 import geothermics.subcrust as subcrust
 
+# Define the model parameters
+conductivity = 3.0          # [W/(m K)]
+crust_temp = 461 + 273.    # temperature at the base of the crust [K]
+crust_depth = 35*10**3      # depth of the base of the crust [m]
 
-def U(z, qc, lambc, zc, A):
-    
-    return qc*(z-zc)/lambc - (0.5*A*(z-zc)**2)/lambc
+depths, temps = pylab.loadtxt('dados.txt', unpack=True)
+
+temps += 273.
+depths *= 1000
+
+print "Read %d data" % (len(temps))
+
+error = 15     # Temperature standard deviation [K]
+
+# Set the initial estimate for the inversion
+initial_radheat = 10**(-9)
+initial_flux = 10**(-3)
+initial_condvar = 10**(-3)
+
+# Run the inversion
+results = subcrust.invert_temp_profile(depths, temps, error, 
+                                       initial_radheat, 
+                                       initial_condvar, initial_flux, 
+                                       ref_temp=crust_temp, 
+                                       ref_cond=conductivity, 
+                                       ref_depth=crust_depth,
+                                       max_it=10000)
+
+inv_radheat, inv_condvar, inv_flux, cov, adjusted, goals = results
+
+sigma_radheat, sigma_condvar, sigma_flux = numpy.sqrt(numpy.diag(cov))
+
+adjusted = subcrust.synthetic_temp_profile(depths, inv_radheat, inv_condvar, 
+                                           inv_flux, crust_temp, conductivity, 
+                                           crust_depth)
+
+residuals = temps - adjusted
+
+print "Inversion results:"
+print "   A = %.5g +- %.2g" % (inv_radheat, sigma_radheat)
+print "   B = %.5g +- %.2g" % (inv_condvar, sigma_condvar)
+print "  qc = %.5g +- %.2g" % (inv_flux, sigma_flux)
+
+# Plot the results
+pylab.figure()
+pylab.plot(temps - 273., depths*0.001, '.k', label="Data (Russell et al, 2001)")
+pylab.ylim(210, 0.001*crust_depth) 
+pylab.xlabel(r"Temperature [$^\circ$C]")
+pylab.ylabel("Depth [km]")
+pylab.grid()
+pylab.legend(loc='upper right', prop={'size':14}, shadow=True)
 
 
-def T1(B, Tc, U):
-    
-    return ((B*Tc - 1) + numpy.sqrt(1 + 2*B*U))/B
+pylab.figure(figsize=(16,6))
 
-def T2(B, Tc, U):
-    
-    return ((B*Tc - 1) - numpy.sqrt(1 + 2*B*U))/B
+pylab.subplot(1,2,1)
+pylab.plot(temps - 273., depths*0.001, '.k', label=r"Data")
+pylab.plot(adjusted - 273., depths*0.001, '.-r', linewidth=1, label="Adjusted") 
+pylab.ylim(210, 0.001*crust_depth)
+pylab.xlabel(r"Temperature [$^\circ$C]")
+pylab.ylabel("Depth [km]")
+pylab.grid()
+pylab.legend(loc='upper right', prop={'size':14}, shadow=True)
 
+pylab.subplot(1,2,2)
+plot = pylab.hist(residuals, bins=len(temps)/6, facecolor='gray')
+pylab.xlabel(r"Residuals [$^\circ$C]")
+pylab.ylabel("Number of occurrences")
 
-if __name__ == '__main__':
-    
-    qc = 13.*10**(-3)
-    
-    A = 0.0000000001
-    
-    B = 0.0000
-    
-    Tc = 400. + 273.
-    
-    lambc = 3.4
-    
-    zc = 35000.
-    
-    z = numpy.arange(35000., 250000., 10000.)
-    
-    u = U(z, qc, lambc, zc, A)
-    print u
-    t1 = T1(B, Tc, u)
-    print t1 - 273
-    
-    t2 = T2(B, Tc, u)
-    print t2 - 273
-    
-    t3 = subcrust.synthetic_temp_profile(z, A, B, qc, Tc, lambc, zc)
-    print t3 - 273
-    z *= 0.001
-    
-    pylab.figure()
-    
-    pylab.plot(t1 - 273, z, '.-b')
-#    pylab.plot(t2 - 273, z, '.-r')
-    pylab.plot(t3 - 273, z, '.-k')
-    
-    pylab.ylim(z.max(), z.min())
-    
-    pylab.show()
+pylab.show()

@@ -90,6 +90,9 @@ def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
 
     * temps
         List of temperatures at the corresponding *depths*
+        
+    * error
+        Error level in the data
 
     * initial_radheat
         Initial estimate for the radiogenic heat generation
@@ -126,6 +129,7 @@ def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
     print "  reference conductivity=%g" % (ref_cond)
     print "  reference depth=%g" % (ref_depth)
     print "  max iterations=%d" % (max_it)
+    print "  data error=%g" % (error)
 
     goals = []
 
@@ -193,7 +197,7 @@ def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
         
         parameters += correction
         
-        cov += normal_eq_sys_inv
+        cov += normal_eq_sys_inv*error**2
         
         rms = (residuals*residuals).sum()
 
@@ -203,7 +207,6 @@ def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
         
         print "  it %d: RMS=%g (%g s)" % (iteration + 1, rms, end - start)
 
-#        if abs((goals[-1] - goals[-2])/goals[-2]) <= 10**(-4):
         if abs(residuals).max() <= 10**(-2):
 
             max_it_exit = False
@@ -213,10 +216,9 @@ def invert_temp_profile(depths, temps, error, initial_radheat, initial_condvar,
     if max_it_exit:
 
         print "WARNING! Exited due to reaching maximum number of iterations."
-
-    cov *= error**2
     
-    results = [parameters[0], parameters[1], parameters[2], cov, adjusted_data, goals]
+    results = [parameters[0], parameters[1], parameters[2], cov, adjusted_data,
+               goals]
 
     return results
 

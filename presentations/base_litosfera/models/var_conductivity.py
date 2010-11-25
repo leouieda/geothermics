@@ -19,14 +19,14 @@ crust_depth = 35*10**3      # depth of the base of the crust [m]
 # Make temperature profiles
 depths = numpy.arange(35000., 200000., 1000.)
 
-pylab.figure(figsize=(16,6))
+pylab.figure(figsize=(11,6))
 
 for cond_var in [-10**(-6)*10**i for i in xrange(4)]:
     
     temps = subcrust.synthetic_temp_profile(depths, rad_heat, cond_var, 
                                             crust_flux, crust_temp, 
                                             conductivity, crust_depth)
-    pylab.plot(temps - 273., depths*0.001, '--', 
+    pylab.plot(temps - 273., depths*0.001, '-.', 
                label=r"B=%2.1e $K^{-1}$" % (cond_var), linewidth=3)
 
 temps = subcrust.synthetic_temp_profile(depths, rad_heat, 0, 
