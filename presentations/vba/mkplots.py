@@ -24,8 +24,6 @@ pylab.ylabel('Z')
 pylab.xlim(xminplot, xcont[-1])
 pylab.ylim(1.2*L0, 0)
 
-pylab.savefig('thickness_cont_raw.pdf')
-
 # Make a discrete plot of the thickness of the lithosphere
 dx = 20
 xdisc = numpy.arange(0.5*dx, xmax, dx)
@@ -51,6 +49,13 @@ pylab.ylabel('Z')
 pylab.xlim(xminplot, xcont[-1])
 pylab.ylim(1.2*L0, 0)
 
-pylab.savefig('thickness_disc_raw.pdf')
+# Plot a regular grid of points
+x = range(0, 10)
+X, Y = pylab.meshgrid(x, x)
+
+pylab.figure()
+pylab.plot(X, Y, '.k')
+pylab.xlim(-1, 11)
+pylab.ylim(-1, 11)
 
 pylab.show()
